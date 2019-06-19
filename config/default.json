@@ -1,3 +1,4 @@
 {
-    "mongoURI": "mongodb+srv://kuba0506:123qwe@mern-4dfst.mongodb.net/test?retryWrites=true&w=majority"
+    "mongoURI": "mongodb+srv://kuba0506:123qwe@mern-4dfst.mongodb.net/test?retryWrites=true&w=majority",
+    "jwtSecret": "secret-token"
 }
