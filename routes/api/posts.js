@@ -35,7 +35,6 @@ router.post(
                 avatar: user.avatar,
                 user: req.user
             });
-
             await newPost.save();
 
             return res.json(newPost);
@@ -75,6 +74,53 @@ router.get('/:post_id', authMIddleware, async (req, res) => {
         return res.status(500).send('Server error');
     }
 });
+
+// @route   PUT api/posts/:post_id
+// @desc    Update a specific post
+// @access  Private
+router.put(
+    '/:post_id',
+    [
+        authMIddleware,
+        [
+            check('text', 'Text is required')
+                .not()
+                .isEmpty()
+        ]
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            let post = await Post.findById(req.params.post_id);
+
+            if (!post) return res.status(404).json({ message: 'Post not found' });
+            // check if user can update a post
+            if (req.user !== post.user.toString()) {
+                return res.status(401).json({ message: 'User not authorized' });
+            }
+
+            // update
+            post = await Post.findOneAndUpdate(
+                { user: req.user },
+                { $set: req.body },
+                {
+                    new: true
+                }
+            );
+
+            return res.json(post);
+        } catch (e) {
+            console.error(e.message);
+            if (e.kind === 'ObjectId') return res.status(404).json({ message: 'Post not found' });
+            return res.status(500).send('Server error');
+        }
+    }
+);
 
 // @route   DELETE api/posts/:post_id
 // @desc    Delete a post
@@ -126,7 +172,7 @@ router.put('/like/:post_id', authMIddleware, async (req, res) => {
 });
 
 // @route   PUT api/posts/unlike/:post_id
-// @desc    Like a post
+// @desc    Unlike a post
 // @access  Private
 router.put('/unlike/:post_id', authMIddleware, async (req, res) => {
     try {
@@ -213,7 +259,7 @@ router.delete('/comment/:post_id/:comment_id', authMIddleware, async (req, res) 
         }
 
         // remove a comment
-        post.comments = post.comments.filter(c => c.id.toString() !== req.params.comment_id);
+        post.comments = post.comments.filter(c => c.id.toString() !== comment.id.toString());
         await post.save();
         return res.json(post.comments);
     } catch (e) {
