@@ -5,8 +5,10 @@ import {
     AUTH_ERROR,
     LOGIN_SUCCESS,
     LOGIN_FAIL,
-    LOGOUT
+    LOGOUT,
+    ACCOUNT_DELETED
 } from '../actions/types';
+import setAuthToken from '../utils/setAuthToken';
 
 const initState = {
     token: localStorage.getItem('token'),
@@ -28,6 +30,7 @@ export default function(state = initState, action) {
         case REGISTER_SUCCESS:
         case LOGIN_SUCCESS:
             localStorage.setItem('token', payload.token);
+            setAuthToken();
             return {
                 ...state,
                 ...payload,
@@ -38,7 +41,9 @@ export default function(state = initState, action) {
         case LOGIN_FAIL:
         case AUTH_ERROR:
         case LOGOUT:
+        case ACCOUNT_DELETED:
             localStorage.removeItem('token');
+            setAuthToken();
             return {
                 ...state,
                 token: null,
