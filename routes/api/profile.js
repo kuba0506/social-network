@@ -150,7 +150,7 @@ router.get('/user/:user_id', async (req, res) => {
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         // remove user posts
-        await Post.deleteMany({user: req.user});
+        await Post.deleteMany({ user: req.user });
         // remove profile
         await Profile.findOneAndRemove({ user: req.user });
         // remove user
@@ -286,20 +286,24 @@ router.delete('/education/:edu_id', authMiddleware, async (req, res) => {
 router.get('/github/:username', async (req, res) => {
     try {
         const options = {
-            uri: `https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc`,
+            uri: `https://api.github.com/users/${
+                req.params.username
+            }/repos?per_page=5&sort=created:asc&client_id=${config.get('githubClientId')}&client_secret=${config.get(
+                'githubSecret'
+            )}`,
             method: 'GET',
             headers: { 'user-agent': 'node.js' }
         };
 
         request(options, (e, response, body) => {
-            if(e) console.log(e);
+            if (e) console.log(e);
 
-            if(response.statusCode !== 200) {
-                return res.status(404).json({message: 'No github profile found'});
+            if (response.statusCode !== 200) {
+                return res.status(404).json({ message: 'No github profile found' });
             }
 
             return res.json(JSON.parse(body));
-         });
+        });
     } catch (e) {
         console.error(e.message);
         return res.status(500).send('Server error');
