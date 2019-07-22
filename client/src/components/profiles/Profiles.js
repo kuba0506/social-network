@@ -16,7 +16,6 @@ const Profiles = ({
         getAllProfiles();
     }, [getAllProfiles]);
 
-
     return (
         <Fragment>
             {loading ? (
